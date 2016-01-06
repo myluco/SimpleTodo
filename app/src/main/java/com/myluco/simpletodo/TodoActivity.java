@@ -27,10 +27,10 @@ public class TodoActivity extends AppCompatActivity {
     // REQUEST_CODE can be any value we like, used to determine the result type later
     private final int REQUEST_CODE = 20;
 
-    ArrayList<String> items;
-    //ArrayList<TodoItem> items;
-    ArrayAdapter<String> itemsAdapter;
-    //TodoItemsAdapter itemsAdapter;
+    //ArrayList<String> items;
+    ArrayList<TodoItem> items;
+    //ArrayAdapter<String> itemsAdapter;
+    TodoItemsAdapter itemsAdapter;
     ListView lvItems;
     EditText etNewItem;
     int lastPosition;
@@ -43,13 +43,13 @@ public class TodoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_todo);
         lvItems = (ListView) findViewById(R.id.lvItems);
         etNewItem = (EditText) findViewById(R.id.etNewItem);
-        readItems();
-        //items = new ArrayList<TodoItem>();
-       // List<TodoItem> queryItems = readItemsFromDB();
-        itemsAdapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, items);
-       // itemsAdapter = new TodoItemsAdapter(this,items);
-        //itemsAdapter.addAll(queryItems);
+        //readItems();
+        items = new ArrayList<TodoItem>();
+        List<TodoItem> queryItems = readItemsFromDB();
+        //itemsAdapter = new ArrayAdapter<String>(this,
+        //        android.R.layout.simple_list_item_1, items);
+        itemsAdapter = new TodoItemsAdapter(this,items);
+        itemsAdapter.addAll(queryItems);
         lvItems.setAdapter(itemsAdapter);
         setupListViewListener();
 
@@ -61,11 +61,11 @@ public class TodoActivity extends AppCompatActivity {
                     @Override
                     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                         //Log.v("long clicked", "pos" + " " + position);
-                        //TodoItem item = items.get(position);
+                        TodoItem item = items.get(position);
                         items.remove(position);
                         itemsAdapter.notifyDataSetChanged();
-                        //item.delete();
-                        writeItems();
+                        item.delete();
+                        //writeItems();
                         return true;
                     }
                 }
@@ -76,10 +76,8 @@ public class TodoActivity extends AppCompatActivity {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         //Log.v("short clicked", "pos" + " " + position);
-                        launchEditItem(items.get(position).toString());
+                        launchEditItem(items.get(position).description);
                         lastPosition = position;
-
-
                     }
                 }
         );
@@ -95,48 +93,51 @@ public class TodoActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE){
             String newText = data.getExtras().getString("itemNewText");
-            // Log.v("New Text",newText);
-            //TodoItem item = items.get(lastPosition);
-            //item.description = newText;
-            items.remove(lastPosition);
-            items.add(lastPosition, newText);
-            itemsAdapter.notifyDataSetChanged();
-            //item.delete();
-            //item.save();
-            writeItems();
-        }
-    }
-//    private List<TodoItem> readItemsFromDB() {
-//
-//        List<TodoItem> queryResults = TodoItem.getAll();
-//        if (queryResults.size() > 0) {
-//            TodoItem lastItem = queryResults.get(queryResults.size());
-//            lastId = lastItem.remoteId;
-//        } else {
-//            lastId = 0;
-//        }
-//        return queryResults;
-//
-//    }
-    private void readItems() {
-        File filesDir = getFilesDir();
-        File todoFile = new File(filesDir, "todo.txt");
-        try {
-            items = new ArrayList<String>(FileUtils.readLines(todoFile));
-        } catch (IOException e) {
-            items = new ArrayList<String>();
-        }
-    }
 
-    private void writeItems() {
-        File filesDir = getFilesDir();
-        File todoFile = new File(filesDir, "todo.txt");
-        try {
-            FileUtils.writeLines(todoFile, items);
-        } catch (IOException e) {
-            e.printStackTrace();
+            TodoItem item = items.get(lastPosition);
+            if (!item.description.equals(newText)) {
+                Log.v("onActivityResult-will update",newText);
+                item.description = newText;
+                items.remove(lastPosition);
+                items.add(lastPosition, item);
+                itemsAdapter.notifyDataSetChanged();
+                item.delete();
+                item.save();
+            }
+            //writeItems();
         }
     }
+    private List<TodoItem> readItemsFromDB() {
+
+        List<TodoItem> queryResults = TodoItem.getAll();
+        if (queryResults.size() > 0) {
+            TodoItem lastItem = queryResults.get(queryResults.size()-1);
+            lastId = lastItem.remoteId;
+        } else {
+            lastId = 0;
+        }
+        return queryResults;
+
+    }
+//    private void readItems() {
+//        File filesDir = getFilesDir();
+//        File todoFile = new File(filesDir, "todo.txt");
+//        try {
+//            items = new ArrayList<String>(FileUtils.readLines(todoFile));
+//        } catch (IOException e) {
+//            items = new ArrayList<String>();
+//        }
+//    }
+//
+//    private void writeItems() {
+//        File filesDir = getFilesDir();
+//        File todoFile = new File(filesDir, "todo.txt");
+//        try {
+//            FileUtils.writeLines(todoFile, items);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     private long getId() {
         lastId++;
@@ -145,9 +146,10 @@ public class TodoActivity extends AppCompatActivity {
     public void onAddItem(View view) {
         String itemText = etNewItem.getText().toString();
         if (!itemText.trim().isEmpty()) {
-            //TodoItem item = new TodoItem(getId(),itemText);
-            itemsAdapter.add(itemText);
-            writeItems();
+            TodoItem item = new TodoItem(getId(),itemText);
+            itemsAdapter.add(item);
+            item.save();
+            //writeItems();
         }
         etNewItem.setText("");
     }
