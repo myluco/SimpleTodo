@@ -33,7 +33,7 @@ The following **additional** features are implemented:
 
 Here's a walkthrough of implemented user stories:
 
-<img src='http://i.imgur.com/link/to/your/gif/file.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+<img src='http://i.imgur.com/0qNBBuf.gifv' title='Video Walkthrough' width='' alt='Video Walkthrough' />
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
@@ -41,7 +41,7 @@ GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
 . Unfortunately, Android Studio started to behave strangely - I use Ubuntu. It would not depict the elements that were either added or deleted to the user interface, change the device, etc. I re-install and things started to wrok again. However, it happened again. Solution: cannot play too much with the designer.
 
-. I
+. Because I use Ubuntu, I have to use LiceCap under wine. Took a few minutes to get going...:)
 
 ## License
 
