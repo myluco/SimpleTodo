@@ -101,7 +101,6 @@ public class TodoActivity extends AppCompatActivity {
                 items.remove(lastPosition);
                 items.add(lastPosition, item);
                 itemsAdapter.notifyDataSetChanged();
-                item.delete();
                 item.save();
             }
             //writeItems();

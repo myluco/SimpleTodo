@@ -6,7 +6,7 @@ SimpleTodo is an android app that allows building a todo list and basic todo ite
 
 Submitted by: Luiza Carneiro
 
-Time spent: 2-3 hours spent in total (I think... I did not measure)
+Time spent: 1 additional hour spent for database savings, etc (I think... I did not measure)
 
 ## User Stories
 
@@ -33,7 +33,7 @@ The following **additional** features are implemented:
 
 Here's a walkthrough of implemented user stories:
 
-<img src='http://i.imgur.com/0qNBBuf.gifv' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+<img src='http://i.imgur.com/4AyLZI5.gifv' title='Video Walkthrough' width='' alt='Video Walkthrough' />
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
