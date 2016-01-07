@@ -4,4 +4,9 @@
     <string name="button_addItem">Add Item</string>
     <string name="label_editItem">Edit Item Below:</string>
     <string name="button_save">Save</string>
+    <string name="notFinished_label">** Not Finished **</string>
+    <string name="bar_label">|</string>
+    <string name="description_label">Description:</string>
+    <string name="date_label">Date:</string>
+    <string name="hint_date">Double Click to enter the finished Date</string>
 </resources>

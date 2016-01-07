@@ -15,10 +15,10 @@
         android:inputType="textMultiLine"
         android:ems="10"
         android:id="@+id/etItemEdit"
-        android:layout_below="@+id/textView"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="40dp" />
+        android:layout_marginTop="25dp"
+        android:layout_below="@+id/tvItemBelow"
+        android:layout_toRightOf="@+id/btSave"
+        android:layout_toEndOf="@+id/btSave" />
 
     <Button
         android:layout_width="wrap_content"
@@ -40,6 +40,36 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/description_label"
+        android:id="@+id/textView2"
+        android:layout_above="@+id/btSave"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/date_label"
+        android:id="@+id/textView3"
+        android:layout_below="@+id/textView2"
+        android:layout_alignRight="@+id/textView2"
+        android:layout_alignEnd="@+id/textView2"
+        android:layout_marginTop="24dp" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="date"
+        android:ems="10"
+        android:id="@+id/etDateItem"
+        android:layout_alignBottom="@+id/textView3"
+        android:layout_alignLeft="@+id/etItemEdit"
+        android:layout_alignStart="@+id/etItemEdit"
+        android:hint="@string/hint_date" />
 
     TextView
         android:layout_width="wrap_content"

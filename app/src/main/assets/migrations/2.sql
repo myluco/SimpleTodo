@@ -1,0 +1,2 @@
+
+ALTER TABLE TodoItems ADD COLUMN date INTEGER;
