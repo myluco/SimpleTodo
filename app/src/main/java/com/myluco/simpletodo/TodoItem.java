@@ -18,6 +18,10 @@ public class TodoItem extends Model{
     @Column(name = "description")
     public String description;
 
+    @Column(name = "date")
+    public long date =0;
+
+    public String dateString;
     public TodoItem() {
         super();
     }
