@@ -71,14 +71,5 @@
         android:layout_alignStart="@+id/etItemEdit"
         android:hint="@string/hint_date" />
 
-    TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Large Text"
-        android:id="@+id/textView2"
-        android:layout_below="@+id/button"
-        android:layout_alignRight="@+id/editText"
-        android:layout_alignEnd="@+id/editText"
-        android:layout_marginTop="78dp" />
+
 </RelativeLayout>

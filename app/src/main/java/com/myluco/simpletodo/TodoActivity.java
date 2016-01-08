@@ -1,9 +1,11 @@
 package com.myluco.simpletodo;
 
+import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,10 +31,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class TodoActivity extends AppCompatActivity {
+public class TodoActivity extends AppCompatActivity implements EditItemFragment.EditItemDialogListener {
 
-    // REQUEST_CODE can be any value we like, used to determine the result type later
-    private final static int REQUEST_CODE = 20;
+
     private static Context mContext;
     //ArrayList<String> items;
     private ArrayList<TodoItem> items;
@@ -42,7 +43,8 @@ public class TodoActivity extends AppCompatActivity {
     private EditText etNewItem;
     private int lastPosition;
     private long lastId;
-
+    //Need to hold the fragment to be able to call its save method.
+    private EditItemFragment editItemDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,16 +56,18 @@ public class TodoActivity extends AppCompatActivity {
         items = new ArrayList<TodoItem>();
         List<TodoItem> queryItems = readItemsFromDB();
 
-        itemsAdapter = new TodoItemsAdapter(this,items);
+        itemsAdapter = new TodoItemsAdapter(this, items);
         itemsAdapter.addAll(queryItems);
 
         lvItems.setAdapter(itemsAdapter);
         setupListViewListener();
 
     }
+
     public static Context getAppContext() {
         return mContext;
     }
+
     private void findViewsById() {
         lvItems = (ListView) findViewById(R.id.lvItems);
         etNewItem = (EditText) findViewById(R.id.etNewItem);
@@ -98,41 +102,18 @@ public class TodoActivity extends AppCompatActivity {
     }
 
     public void launchEditItem(String itemText, String itemDate) {
-        Intent i = new Intent(this,EditItemActivity.class);
-        i.putExtra("itemText", itemText);
-        i.putExtra("itemDate", itemDate);
-        startActivityForResult(i, REQUEST_CODE);
+
+        FragmentManager fm = getSupportFragmentManager();
+        editItemDialog = EditItemFragment.newInstance(itemText, itemDate);
+        editItemDialog.show(fm, "fragment_edit_item");
+
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data){
-        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE){
-            String newText = data.getExtras().getString("itemDescription");
-            String newDate = data.getExtras().getString("itemDate");
-            long longDate = Utilities.longFromDateString(newDate);
-            if (longDate == 0) {
-                newDate = Utilities.NotFinished();
-            }
-            TodoItem item = items.get(lastPosition);
-
-                Log.v("onActivityResult-will update",newText);
-                item.description = newText;
-                item.dateString = newDate;
-
-                item.date = longDate;
-                items.remove(lastPosition);
-                items.add(lastPosition, item);
-                itemsAdapter.notifyDataSetChanged();
-                item.save();
-
-            //writeItems();
-        }
-    }
     private List<TodoItem> readItemsFromDB() {
 
         List<TodoItem> queryResults = TodoItem.getAll();
         if (queryResults.size() > 0) {
-            TodoItem lastItem = queryResults.get(queryResults.size()-1);
+            TodoItem lastItem = queryResults.get(queryResults.size() - 1);
             lastId = lastItem.remoteId;
         } else {
             lastId = 0;
@@ -140,39 +121,62 @@ public class TodoActivity extends AppCompatActivity {
         return queryResults;
 
     }
-//    private void readItems() {
-//        File filesDir = getFilesDir();
-//        File todoFile = new File(filesDir, "todo.txt");
-//        try {
-//            items = new ArrayList<String>(FileUtils.readLines(todoFile));
-//        } catch (IOException e) {
-//            items = new ArrayList<String>();
-//        }
-//    }
-//
-//    private void writeItems() {
-//        File filesDir = getFilesDir();
-//        File todoFile = new File(filesDir, "todo.txt");
-//        try {
-//            FileUtils.writeLines(todoFile, items);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
+
 
     private long getId() {
         lastId++;
         return lastId;
     }
+
     public void onAddItem(View view) {
         String itemText = etNewItem.getText().toString();
         if (!itemText.trim().isEmpty()) {
-            TodoItem item = new TodoItem(getId(),itemText);
+            TodoItem item = new TodoItem(getId(), itemText);
             item.dateString = Utilities.NotFinished();
             itemsAdapter.add(item);
             item.save();
             //writeItems();
         }
         etNewItem.setText("");
+    }
+
+    /**
+     * This is the method that will be called when the EditItemFragment done
+     *
+     * @param newItemText
+     * @param newItemDate
+     */
+    @SuppressLint("LongLogTag")
+    @Override
+    public void onFinishEditItemDialog(String newItemText, String newItemDate) {
+
+        String newDate = newItemDate;
+        long longDate = Utilities.longFromDateString(newDate);
+        if (longDate == 0) {
+            newDate = Utilities.NotFinished();
+        }
+        TodoItem item = items.get(lastPosition);
+
+        Log.v("onActivityResult", newItemText);
+        item.description = newItemText;
+        item.dateString = newDate;
+
+        item.date = longDate;
+        items.remove(lastPosition);
+        items.add(lastPosition, item);
+        itemsAdapter.notifyDataSetChanged();
+        item.save();
+    }
+
+
+    /**
+     * The click method for the button save in the EditItemFragment needs to be defined in an
+     * activity. So I chose the activity that calls it, and immediatelly calls the method that is
+     * being defined in the EditItemFragment.
+     *
+     * @param view
+     */
+    public void onSaveEditItemDialog(View view) {
+        editItemDialog.onSave(view);
     }
 }
