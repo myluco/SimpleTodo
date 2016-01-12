@@ -188,10 +188,10 @@ public class TodoActivity extends AppCompatActivity implements EditItemFragment.
         items.remove(lastPosition);
         if (!item.shouldBeRemoved()) {
             items.add(lastPosition, item);
-            itemsAdapter.sort(itemsAdapter);
-            itemsAdapter.notifyDataSetChanged();
-        }
 
+        }
+        itemsAdapter.sort(itemsAdapter);
+        itemsAdapter.notifyDataSetChanged();
         item.save();
     }
 
