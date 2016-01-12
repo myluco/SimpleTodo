@@ -11,12 +11,16 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.Calendar;
 
@@ -24,14 +28,19 @@ import java.util.Calendar;
 public class EditItemFragment extends DialogFragment  {
 
 
-    private String itemText;
-    private String itemDate;
+    private TodoItem item;
+
     private EditText etDescription;
     private EditText etDate;
+    private EditText etNotes;
+    private RadioGroup rgStatus;
+    private RadioGroup rgPriority;
+    private Button btSave;
+
     private DatePickerDialog datePickerDialog;
 
     public interface EditItemDialogListener {
-            void onFinishEditItemDialog(String newItemText,String newItemDate);
+            void onFinishEditItemDialog(TodoItem item);
     }
 
     public EditItemFragment() {
@@ -48,11 +57,14 @@ public class EditItemFragment extends DialogFragment  {
      * @return A new instance of fragment EditItemFragment.
      */
 
-    public static EditItemFragment newInstance(String itemText, String itemDate) {
+    public static EditItemFragment newInstance(TodoItem item) {
         EditItemFragment fragment = new EditItemFragment();
         Bundle args = new Bundle();
-        args.putString("itemText", itemText);
-        args.putString("itemDate", itemDate);
+        args.putString("itemText", item.description);
+        args.putString("itemDate", item.dueDateString);
+        args.putSerializable("itemStatus", item.status);
+        args.putSerializable("itemPriority", item.priority);
+        args.putString("itemNotes", item.notes);
         fragment.setArguments(args);
         return fragment;
     }
@@ -62,20 +74,105 @@ public class EditItemFragment extends DialogFragment  {
         super.onViewCreated(view, savedInstanceState);
 
         if (getArguments() != null) {
-            itemText = getArguments().getString("itemText");
-            itemDate = getArguments().getString("itemDate");
+            item = new TodoItem();
+            item.description = getArguments().getString("itemText");
+            item.dueDateString = getArguments().getString("itemDate");
+            item.notes = getArguments().getString("itemNotes");
+            item.priority = (TodoItem.Priority)getArguments().getSerializable("itemPriority");
+            item.status= (TodoItem.Status)getArguments().getSerializable("itemStatus");
+        }
+        getViewById(view);
+        setListeners();
+        populate();
+
+
+    }
+
+    private void populate() {
+        etDescription.setText(item.description);
+        etDescription.requestFocus();
+        etDescription.setSelection(item.description.length());
+
+        etDate.setText(item.dueDateString);
+        etDate.setInputType(InputType.TYPE_NULL);
+
+        etNotes.setText(item.notes);
+
+        setPriority();
+        setStatus();
+
+
+    }
+    private void setPriority() {
+        switch (item.priority) {
+            case HIGH:
+                rgPriority.check(R.id.rbHigh);
+                break;
+            case MEDIUM:
+                rgPriority.check(R.id.rbMedium);
+                break;
+            case LOW:
+                rgPriority.check(R.id.rbLow);
+                break;
+
         }
 
+    }
+
+    private void setStatus() {
+        switch(item.status){
+            case TODO:
+                rgStatus.check(R.id.rbTodo);
+                break;
+            case DONE:
+                rgStatus.check(R.id.rbDone);
+        }
+    }
+    private void setListeners() {
+        rgPriority.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                // find which radio button is selected
+
+                if (checkedId == R.id.rbLow) {
+                    item.setPriority(TodoItem.Priority.LOW);
+                } else if (checkedId == R.id.rbMedium) {
+                    item.setPriority(TodoItem.Priority.MEDIUM);
+                } else {//High Priority
+                    item.setPriority(TodoItem.Priority.HIGH);
+                }
+                Log.v("Fragment-Priority", item.priority.name());
+            }
+        });
+        rgStatus.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                // find which radio button is selected
+                if (checkedId == R.id.rbTodo) {
+                    item.setStatus(TodoItem.Status.TODO);
+
+                } else {//High Priority
+                    item.setStatus(TodoItem.Status.DONE);
+                }
+                Log.v("Fragment-Status", item.status.name());
+            }
+        });
+        btSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onSave(v);
+            }
+        });
+        setupDateListener();
+
+    }
+    private void getViewById(View view) {
         etDescription = (EditText) view.findViewById(R.id.etItemEdit);
         etDate = (EditText)view.findViewById(R.id.etDateItem);
-
-        etDescription.setText(itemText);
-        etDescription.requestFocus();
-        etDescription.setSelection(itemText.length());
-
-        etDate.setText(itemDate);
-        etDate.setInputType(InputType.TYPE_NULL);
-        setupDateListener();
+        etNotes = (EditText)view.findViewById(R.id.etNotes);
+        rgPriority=(RadioGroup)view.findViewById(R.id.rgPriority);
+        rgStatus = (RadioGroup)view.findViewById(R.id.rgStatus);
+        btSave = (Button) view.findViewById(R.id.btSave);
     }
     @Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -101,6 +198,7 @@ public class EditItemFragment extends DialogFragment  {
                 Calendar newDate = Calendar.getInstance();
                 newDate.set(year, monthOfYear, dayOfMonth);
                 etDate.setText(Utilities.dateStringFromLong(newDate.getTime().getTime()));
+                item.dueDateString = etDate.getText().toString();
             }
 
         },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
@@ -109,8 +207,10 @@ public class EditItemFragment extends DialogFragment  {
 
     public void onSave(View view) {
         EditItemDialogListener listener = (EditItemDialogListener) getActivity();
-        listener.onFinishEditItemDialog(etDescription.getText().toString(),etDate.getText().toString());
+        item.notes = etNotes.getText().toString();
+        listener.onFinishEditItemDialog(item);
         dismiss();
 
     }
+
 }

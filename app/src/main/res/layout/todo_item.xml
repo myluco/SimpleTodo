@@ -19,5 +19,13 @@
         android:layout_alignTop="@+id/tvDescription"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
+    <TextView
+        android:id="@+id/tvPriority"
+        android:layout_width="131dp"
+        android:layout_height="wrap_content"
+
+        android:layout_alignTop="@+id/tvDate"
+        android:layout_toLeftOf="@+id/tvDate"
+        android:layout_toStartOf="@+id/tvDate" />
 
 </RelativeLayout>

@@ -4,7 +4,9 @@ import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,9 +29,14 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class TodoActivity extends AppCompatActivity implements EditItemFragment.EditItemDialogListener {
 
@@ -37,6 +44,7 @@ public class TodoActivity extends AppCompatActivity implements EditItemFragment.
     private static Context mContext;
     //ArrayList<String> items;
     private ArrayList<TodoItem> items;
+
     //ArrayAdapter<String> itemsAdapter;
     private TodoItemsAdapter itemsAdapter;
     private ListView lvItems;
@@ -54,12 +62,15 @@ public class TodoActivity extends AppCompatActivity implements EditItemFragment.
         findViewsById();
 
         items = new ArrayList<TodoItem>();
+
         List<TodoItem> queryItems = readItemsFromDB();
 
         itemsAdapter = new TodoItemsAdapter(this, items);
         itemsAdapter.addAll(queryItems);
 
         lvItems.setAdapter(itemsAdapter);
+        itemsAdapter.sort(itemsAdapter);
+
         setupListViewListener();
 
     }
@@ -79,7 +90,9 @@ public class TodoActivity extends AppCompatActivity implements EditItemFragment.
                     @Override
                     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                         //Log.v("long clicked", "pos" + " " + position);
+                        parent.getChildAt(position).setBackgroundColor(Color.BLUE);
                         TodoItem item = items.get(position);
+
                         items.remove(position);
                         itemsAdapter.notifyDataSetChanged();
                         item.delete();
@@ -94,17 +107,17 @@ public class TodoActivity extends AppCompatActivity implements EditItemFragment.
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         //Log.v("short clicked", "pos" + " " + position);
-                        launchEditItem(items.get(position).description, items.get(position).dateString);
+                        launchEditItem(items.get(position));
                         lastPosition = position;
                     }
                 }
         );
     }
 
-    public void launchEditItem(String itemText, String itemDate) {
+    public void launchEditItem(TodoItem item) {
 
         FragmentManager fm = getSupportFragmentManager();
-        editItemDialog = EditItemFragment.newInstance(itemText, itemDate);
+        editItemDialog = EditItemFragment.newInstance(item);
         editItemDialog.show(fm, "fragment_edit_item");
 
     }
@@ -132,8 +145,12 @@ public class TodoActivity extends AppCompatActivity implements EditItemFragment.
         String itemText = etNewItem.getText().toString();
         if (!itemText.trim().isEmpty()) {
             TodoItem item = new TodoItem(getId(), itemText);
-            item.dateString = Utilities.NotFinished();
+//            Log.v("TodoActivity-onAddItem-Created id ", String.valueOf(item.remoteId));
+            item.dueDateString = Utilities.NotFinished();
+            item.setPriority(TodoItem.Priority.MEDIUM);
+            item.setStatus(TodoItem.Status.TODO);
             itemsAdapter.add(item);
+            itemsAdapter.sort(itemsAdapter);
             item.save();
             //writeItems();
         }
@@ -148,35 +165,36 @@ public class TodoActivity extends AppCompatActivity implements EditItemFragment.
      */
     @SuppressLint("LongLogTag")
     @Override
-    public void onFinishEditItemDialog(String newItemText, String newItemDate) {
+    public void onFinishEditItemDialog(TodoItem itemFixed) {
 
-        String newDate = newItemDate;
+        String newDate = itemFixed.dueDateString;
         long longDate = Utilities.longFromDateString(newDate);
         if (longDate == 0) {
             newDate = Utilities.NotFinished();
         }
         TodoItem item = items.get(lastPosition);
 
-        Log.v("onActivityResult", newItemText);
-        item.description = newItemText;
-        item.dateString = newDate;
+        //Log.v("onActivityResult", newItemText);
+        item.description = itemFixed.description;
+        item.dueDateString = newDate;
 
         item.date = longDate;
+        item.setPriority(itemFixed.priority);
+//        Log.v("onFinishEditItemDialog", String.valueOf(item.priorityDB));
+        item.setStatus(itemFixed.status);
+//        Log.v("onFinishEditItemDialog", String.valueOf(item.statusDB));
+        item.notes = itemFixed.notes;
+//        Log.v("onFinishEditItemDialog", item.notes);
         items.remove(lastPosition);
-        items.add(lastPosition, item);
-        itemsAdapter.notifyDataSetChanged();
+        if (!item.shouldBeRemoved()) {
+            items.add(lastPosition, item);
+            itemsAdapter.sort(itemsAdapter);
+            itemsAdapter.notifyDataSetChanged();
+        }
+
         item.save();
     }
 
 
-    /**
-     * The click method for the button save in the EditItemFragment needs to be defined in an
-     * activity. So I chose the activity that calls it, and immediatelly calls the method that is
-     * being defined in the EditItemFragment.
-     *
-     * @param view
-     */
-    public void onSaveEditItemDialog(View view) {
-        editItemDialog.onSave(view);
-    }
+
 }

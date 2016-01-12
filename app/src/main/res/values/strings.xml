@@ -1,15 +1,27 @@
 <resources>
-    <string name="app_name">Simple Todo</string>
+    <string name="app_name">Brainy</string>
     <string name="hintEditText">Enter a new item</string>
     <string name="button_addItem">Add Item</string>
     <string name="label_editItem">Edit Item Below:</string>
     <string name="button_save">Save</string>
-    <string name="notFinished_label">** Not Finished **</string>
+    <string name="notFinished_label">** Not Defined **</string>
     <string name="bar_label">|</string>
     <string name="description_label">Description:</string>
-    <string name="date_label">Date:</string>
+    <string name="date_label">Due Date:</string>
     <string name="hint_date">Double Click to enter the finished Date</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="high">HIGH</string>
+    <string name="medium">MEDIUM</string>
+    <string name="low">LOW</string>
+    <string name="todo">TODO</string>
+    <string name="done">DONE</string>
+    <string name="tvNotes">Notes</string>
+    <string name="status">Status</string>
+    <string name="priority">Priority</string>
+    <string name="notes">Notes</string>
+    <string name="title_activity_splash">Brainy</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

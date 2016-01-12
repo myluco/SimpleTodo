@@ -29,7 +29,7 @@ public class Utilities {
                 date = dateFormatter.parse(dateString);
             } catch (ParseException e) {
                 date = null;
-                Log.e("TodoActivity-onActivityResult", "date input wrong");
+                Log.e("Utilities-longfromDate", "date input wrong - " +dateString );
             }
         long longDate;
         if (date != null) {
