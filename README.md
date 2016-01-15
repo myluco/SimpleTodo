@@ -36,6 +36,8 @@ The following **additional** features are implemented:
 * [x] Splash screen in the beginning.
 * [x] Support for notes.
 * [x] Cancel button added to edit item
+* [x] Depict overdue items within their priority with a more saturated color.
+
 
 ## Video Walkthrough 
 
