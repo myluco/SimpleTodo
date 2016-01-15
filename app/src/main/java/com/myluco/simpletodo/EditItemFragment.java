@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 
 public class EditItemFragment extends DialogFragment  {
@@ -36,6 +37,8 @@ public class EditItemFragment extends DialogFragment  {
     private RadioGroup rgStatus;
     private RadioGroup rgPriority;
     private Button btSave;
+    private Button btCancel;
+
 
     private DatePickerDialog datePickerDialog;
 
@@ -52,8 +55,7 @@ public class EditItemFragment extends DialogFragment  {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param itemText
-     * @param itemDate
+     * @param item
      * @return A new instance of fragment EditItemFragment.
      */
 
@@ -163,6 +165,12 @@ public class EditItemFragment extends DialogFragment  {
                 onSave(v);
             }
         });
+        btCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onCancel(v);
+            }
+        });
         setupDateListener();
 
     }
@@ -173,6 +181,7 @@ public class EditItemFragment extends DialogFragment  {
         rgPriority=(RadioGroup)view.findViewById(R.id.rgPriority);
         rgStatus = (RadioGroup)view.findViewById(R.id.rgStatus);
         btSave = (Button) view.findViewById(R.id.btSave);
+        btCancel = (Button) view.findViewById(R.id.btCancel);
     }
     @Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -191,26 +200,34 @@ public class EditItemFragment extends DialogFragment  {
                                   }
 
         );
-        Calendar newCalendar = Calendar.getInstance();
+        final Calendar newCalendar = new GregorianCalendar();
+
         datePickerDialog = new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
 
             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                Calendar newDate = Calendar.getInstance();
-                newDate.set(year, monthOfYear, dayOfMonth);
-                etDate.setText(Utilities.dateStringFromLong(newDate.getTime().getTime()));
+
+                newCalendar.set(year, monthOfYear, dayOfMonth);
+                newCalendar.set(GregorianCalendar.HOUR_OF_DAY, 23);
+                newCalendar.set(GregorianCalendar.MINUTE, 59);
+                newCalendar.set(GregorianCalendar.SECOND, 0);
+                etDate.setText(Utilities.dateStringFromLong(newCalendar.getTimeInMillis()));
                 item.dueDateString = etDate.getText().toString();
             }
 
-        },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
+        },newCalendar.get(GregorianCalendar.YEAR), newCalendar.get(GregorianCalendar.MONTH), newCalendar.get(GregorianCalendar.DAY_OF_MONTH));
 
     }
 
     public void onSave(View view) {
         EditItemDialogListener listener = (EditItemDialogListener) getActivity();
         item.notes = etNotes.getText().toString();
+        item.description = etDescription.getText().toString();
         listener.onFinishEditItemDialog(item);
         dismiss();
 
+    }
+    public void onCancel(View view) {
+        dismiss();
     }
 
 }

@@ -7,7 +7,10 @@ import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 
+import java.util.Calendar;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 /**
@@ -20,7 +23,7 @@ public class TodoItem extends Model implements Comparable<TodoItem> {
 
     public static enum Status {TODO, DONE};
     public static enum Priority {HIGH,MEDIUM,LOW};
-
+    public static long today = getTodayLastMinute();
 
 
     @Column(name = "remoteId", unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
@@ -47,7 +50,19 @@ public class TodoItem extends Model implements Comparable<TodoItem> {
     public Status status;
 
     public String dueDateString;
+    public static long getTodayLastMinute() {
+        // today
+        Calendar date = new GregorianCalendar();
+        // reset hour, minutes, seconds and millis
+        date.set(GregorianCalendar.HOUR_OF_DAY, 0);
+        date.set(GregorianCalendar.MINUTE, 0);
+        date.set(GregorianCalendar.SECOND, 0);
+        date.set(GregorianCalendar.MILLISECOND, 0);
+        // next day
 
+        Log.v("StaticTodoItem", Utilities.dateStringFromLong(date.getTimeInMillis()));
+        return date.getTimeInMillis();
+    }
     public TodoItem() {
         super();
     }
@@ -65,6 +80,29 @@ public class TodoItem extends Model implements Comparable<TodoItem> {
         }
         else if (priorityDB < another.priorityDB) {
             return -1;
+        } else {
+            //priorities are the same. Order by date (close to be due-overdue first)
+            // put all the not defined at the bottom
+
+            if ( (date == 0) && (another.date==0)){
+
+                return 0;
+            }
+            if (date == 0) {
+
+                return 1;
+            }
+            if (another.date == 0) {
+
+                return -1;
+            }
+            if (date > another.date) {
+
+                return 1;
+            } else if (date < another.date) {
+
+                return -1;
+            }
         }
         return 0;
     }
@@ -74,11 +112,11 @@ public class TodoItem extends Model implements Comparable<TodoItem> {
     public static List<TodoItem> getAll() {
         // This is how you execute a query
         List<TodoItem> items = new Select()
-          .from(TodoItem.class)
-          .orderBy("priorityDB,date DESC")
-          .where("statusDB = 0")
-          .limit(100)
-          .execute();
+                .from(TodoItem.class)
+                .orderBy("priorityDB,date DESC")
+                .where("statusDB = 0")
+                .limit(100)
+                .execute();
 //        for (TodoItem item: items) {
 //            Log.v("TodoItem-GetAll-Id/Priority",String.valueOf(item.getId())+"/"+String.valueOf(item.priorityDB));
 //
@@ -93,7 +131,7 @@ public class TodoItem extends Model implements Comparable<TodoItem> {
     }
     public void setStatus(Status s) {
         status = s;
-       statusDB = s.ordinal();
+        statusDB = s.ordinal();
 //        Log.v("TodoItem-Status = ", String.valueOf(statusDB));
     }
     public boolean shouldBeRemoved() {
@@ -101,6 +139,17 @@ public class TodoItem extends Model implements Comparable<TodoItem> {
             return true;
         }
         return false;
+    }
+    public boolean isLate() {
+//        Log.v("TodoItem", "Dexcription= " + description);
+//        Log.v("TodoItem", "Date= " + date);
+//        Log.v("TodoItem", "Today= " + today);
+        if( (date != 0) && (today - date > 0) ) {
+//            Log.v("TodoItem", "Item is late");
+            return true;
+        }
+        return   false;
+
     }
 
 }

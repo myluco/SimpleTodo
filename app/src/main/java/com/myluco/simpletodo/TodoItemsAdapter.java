@@ -30,7 +30,13 @@ public class TodoItemsAdapter extends ArrayAdapter<TodoItem> implements Comparat
 
     }
 
-
+    private int increaseSaturationValue(int c) {
+        float[] hsv = new float[3];
+        Color.colorToHSV(c,hsv);
+        hsv[1] = 100;
+        hsv[2]= 100;
+        return Color.HSVToColor(hsv);
+    }
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         TodoItem item = getItem(position);
@@ -54,27 +60,38 @@ public class TodoItemsAdapter extends ArrayAdapter<TodoItem> implements Comparat
 //        Log.v("TodoItemAdapter-Item", String.valueOf(item.getId()));
         tvDate.setText(item.dueDateString);
 //        Log.v("TodoItemAdapter-PriorityDB", String.valueOf(item.priorityDB));
+        int color=0;
         switch (item.priorityDB) {
             case 0:
                 tvPriority.setText(getContext().getString(R.string.high));
                 item.priority = TodoItem.Priority.HIGH;
 //                convertView.setBackgroundColor(Color.MAGENTA);
-                convertView.setBackgroundColor(convertView.getResources().getColor(R.color.Tomato));
+                color = convertView.getResources().getColor(R.color.Tomato);
+                convertView.setBackgroundColor(color);
 //                convertView.setBackgroundColor(0xFFFF4500);
                 break;
             case 1:
                 tvPriority.setText(getContext().getString(R.string.medium));
                 item.priority = TodoItem.Priority.MEDIUM;
 //                convertView.setBackgroundColor(0xFFFFE4C4);
-                convertView.setBackgroundColor(convertView.getResources().getColor(R.color.DarkSeaGreen));
+                color = convertView.getResources().getColor(R.color.DarkSeaGreen);
+                convertView.setBackgroundColor(color);
                 break;
             case 2:
                 tvPriority.setText(getContext().getString(R.string.low));
                 item.priority = TodoItem.Priority.LOW;
-                convertView.setBackgroundColor(convertView.getResources().getColor(R.color.LightSteelBlue));
+                color = convertView.getResources().getColor(R.color.LightSteelBlue);
+                convertView.setBackgroundColor(color);
                 break;
 
         }
+        //increase saturation of color if task is late
+        if (item.isLate()) {
+           int anotherColor = increaseSaturationValue(color);
+            convertView.setBackgroundColor(anotherColor);
+        }
+
+
 //         Log.v("TodoItemAdapter-StatusDB", String.valueOf(item.statusDB));
         switch (item.statusDB) {
             case 0:

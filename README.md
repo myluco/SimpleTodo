@@ -30,13 +30,18 @@ The following **additional** features are implemented:
 * [x] Only update item description if there was a change
 * [x] Use DatePicker to enter date of completion
 * [x] Support for status
+* [x] Splash screen created
+* [x] Ordering of items is: first priority; within priority,  due date in ascending order, except dates that are not defined are located at the end of the priority; .
+* [x] Icon for application was created (from ldpi to xxxhdpi)
 * [x] Splash screen in the beginning.
+* [x] Support for notes.
+* [x] Cancel button added to edit item
 
 ## Video Walkthrough 
 
 Here's a walkthrough of implemented user stories:
 
-[Video Walkthrough](http://i.imgur.com/7wwquGF.gifv)
+[Video Walkthrough](http://i.imgur.com/77WY2jY.gifv)
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
